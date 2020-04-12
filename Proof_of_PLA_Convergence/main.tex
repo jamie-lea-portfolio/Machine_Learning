@@ -1,0 +1,136 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{fullpage}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\usepackage{graphicx}
+
+\pagestyle{fancyplain}
+\setcounter{MaxMatrixCols}{20}
+
+\titleformat{\section}
+  {\normalfont\scshape}{\thesection}{1em}{}
+
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% \newcommand{name}[num][default]{definition}
+
+% Commands to define vector notation and commonly used vector macros in the project
+\newcommand{\myvec}[1][v]{\mathbf{#1}}
+\newcommand{\vecsub}[2]{\myvec[#1]_{#2}}
+\newcommand{\vecsup}[2]{\myvec[#1]^{#2}}
+
+\newcommand{\wsub}[1]{\vecsub{w}{#1}}
+\newcommand{\wsubt}{\wsub{t}}
+\newcommand{\wsubtt}{\wsub{t+1}}
+
+\newcommand{\wfix}{\vecsup{w}{\ast}}
+\newcommand{\wopt}{\vecsup{w}{\bullet}}
+
+\newcommand{\psub}[1]{\vecsub{p}{i(#1)}}
+\newcommand{\psubt}{\psub{t}}
+\newcommand{\psubtt}{\psub{t+1}}
+
+\newtheorem{proposition}{Proposition}
+
+\headheight 25pt
+\lhead{Jamie Lea}
+\chead{CS5340 Machine Learning}
+\rhead{Poof of PLA Convergence}
+
+\headsep 1.5em
+
+
+\begin{document}
+
+\begin{proposition}
+If the sets $P$ and $N$ are finite and linearly separable, the perceptron learning algorithm halts on a solution vector $\wsubtt$.
+\end{proposition}
+
+\begin{proof}
+Without loss of generality, consider the set $P' = P \cup N^{-} \text{ where } N^{-} = \{\,-\myvec[n] \,|\,\myvec[n] \in N\,\}$.  We can do this because a plane that separates $P$ and $N$ separates $\varnothing$ and $P'$.\par
+Fix a solution vector $\wfix$.  After $t+1$ steps a new weight vector $\wsubtt = \wsubt + \psubt$ has been computed ($i(t)$ is the index of the data vector $\myvec[p]$ picked aon step $t$).
+\\\\
+Recall that the cosine of the angle $\rho$ between $\wfix$ and $\wsubtt$ is:
+\begin{equation}
+    \cos{\rho} = \frac{\wfix \cdot \wsubtt}{\|\wfix\|\|\wsubtt\|}
+\end{equation}
+Then in the numerator we have:
+\begin{align*}
+    \wfix \cdot \wsubtt & = \wfix \cdot (\wsubt + \psubt) \\
+    & = \wfix \cdot \wsubt + \wfix \cdot \psubt \\
+    & \geq \wfix \cdot \wsubt + \delta \text{ where } \delta = \min\{\,\wfix \cdot \myvec[p] \,|\, \forall \myvec[p] \in P'\,\}
+\end{align*}
+Clearly $\wfix \cdot \psubt \geq \delta, \,\forall t$.  So by induction we have 
+\begin{equation}
+    \wfix \cdot \wsubtt \geq \wfix \cdot \wsub{0} + (t+1)\delta.
+\end{equation}
+To see this we can expand the first few terms.  Notice it's the same as in the normalized case:\\
+\begin{align*}
+    \wfix \cdot \wsub{1} = \wfix \cdot (\wsub{0} + \psub{0}) & = \wfix \cdot \wsub{0} + \wfix \cdot \psub{0}\\
+    &\geq \wfix \cdot \wsub{0} + \delta\\
+    \wfix \cdot \wsub{2} = \wfix \cdot (\wsub{1} + \psub{1}) & = \wfix \cdot \wsub{1} + \wfix \cdot \psub{1}\\
+    &\geq \wfix \cdot \wsub{0} + \delta + \wfix \cdot \psub{1}\\
+    &\geq \wfix \cdot \wsub{0} + (2)\delta\\
+    \wfix \cdot \wsub{3} = \wfix \cdot (\wsub{2} + \psub{2}) & = \wfix \cdot \wsub{2} + \wfix \cdot \psub{2}\\
+    &\geq \wfix \cdot \wsub{0} + (2)\delta + \wfix \cdot \psub{2}\\
+    &\geq \wfix \cdot \wsub{0} + (3)\delta\\
+    &\;\;\vdots\\
+    \wfix \cdot \wsub{t+1} =\wfix \cdot (\wsub{t} + \psub{t}) & = \wfix \cdot \wsub{t} + \sum_{j=0}^{t}\wfix \cdot \psub{j}\\
+    &\geq \wfix \cdot \wsub{0} + (t+1)\delta\\
+\end{align*}
+For the denominator $\|\wfix\|\|\wsubtt = k\|\wsubtt\|$, consider:
+\begin{align*}
+    \|\wsubtt\|^{2} & = (\wsubt + \psub{t}) \cdot (\wsubt + \psub{t})\\
+    & =\|\wsubt\|^{2} + 2\wsubt \cdot \psub{t} + \|\psub{t}\|^{2}
+\end{align*}
+
+Here is a difference from the normalized case.  $\|\psub{t}\|^{2}$ is not necessarily equal to 1, so let $\epsilon = \max\{\,\|\psub{t}\|^{2} \,|\, \forall \myvec[p] \in P \,\}$.  Then $\|\psub{t}\|^{2} \leq \epsilon, \, \forall t$.  As in the normalized case, $2\wsubt \cdot \psub{t} \leq 0$ since prior to correction $\psub{t}$ either lies on or ``behind'' the hyperplane.\\
+Therefore,
+$
+    \|\wsubtt\|^{2} \leq \|\wsubt\|^{2} + \epsilon
+$
+and by induction,
+\begin{equation}
+    \|\wsubtt\|^{2} \leq \|\wsub{0}\| + (t+1)\epsilon.
+\end{equation}
+
+Then from (1), (2), (3), we get
+\begin{equation*}
+    \cos{\rho} \geq \frac{\wfix \cdot \wsub{0} + (t+1)\delta}{k\sqrt{\|\wsub{0}\|^{2} + (t+1)\epsilon}}
+\end{equation*}
+Since $\sqrt{t}$ is monotonically increasing and unbounded, and $\delta > 0$ (because we are looking for an \textit{absolute} linear separation), the RHS can become arbitrarily large.  However, the LHS is bound by 1:
+\begin{equation*}
+    1 \geq \cos{\rho} \geq \frac{\wfix \cdot \wsub{0} + (t+1)\delta}{\|\wfix\|\sqrt{\|\wsub{0}\|^{2} + (t+1)\epsilon}} \varpropto \frac{t}{\sqrt{t}} = \sqrt{t}
+\end{equation*}
+
+So $t$ must have some maximum value, thus the algorithm halts.  Since the algorithm only halts on a solution vector, the algorithm finds a solution. 
+\end{proof}
+
+Having $\delta > 0$ is important.  If we allowed non-absolute linear separability, then the fraction could asymptotically approach 0 and in those cases the algorithm would never halt!  \par
+
+\begin{proof}
+The PLA works because all solutions have an associated neighborhood of solutions:
+\begin{align*}
+&(\forall \wfix_{j} \, \exists \, \theta_{j} \, \forall \wsub{j}(\wfix_{j} \in \text{solutions}(P, N) \,\wedge\, |\wfix_{j} \angle \wsub{j}| < \theta_{j}) \implies \wsub{j} \in \text{solutions}(P, N)) \\
+\wedge&\, ((t \rightarrow \infty \implies \rho \rightarrow 0)
+\implies \,|\rho_{t+1}| < |\theta^{*}|)\\
+\therefore&\,\wsubtt \in \text{solutions}(P,N)
+\end{align*}
+\end{proof}
+
+
+
+
+\end{document}
